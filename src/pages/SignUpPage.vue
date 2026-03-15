@@ -64,13 +64,16 @@ const handleSignUp = async () => {
     router.push('/')
   } catch (e: unknown) {
     const err = e as unknown
-    error.value =
-      err &&
+    if (
       typeof err === 'object' &&
+      err !== null &&
       'message' in err &&
-      typeof (err as unknown).message === 'string'
-        ? (err as unknown).message
-        : "Erreur lors de l'inscription"
+      typeof (err as { message?: string }).message === 'string'
+    ) {
+      error.value = (err as { message: string }).message
+    } else {
+      error.value = "Erreur lors de l'inscription"
+    }
   } finally {
     loading.value = false
   }
