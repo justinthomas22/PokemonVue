@@ -49,10 +49,8 @@ const handleLogin = async () => {
     await authStore.login(email.value, password.value)
     router.push('/')
   } catch (e: unknown) {
-    error.value =
-      typeof e === 'object' && e && 'message' in e
-        ? (e as unknown).message
-        : 'Identifiants incorrects'
+    const err = e as unknown
+    error.value = err && err.message ? err.message : 'Identifiants incorrects'
   } finally {
     loading.value = false
   }
