@@ -35,5 +35,18 @@ router.beforeEach((to, from, next) => {
   }
   next()
 })
+router.beforeEach((to, _from, next) => {
+  const auth = useAuthStore()
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return next({ path: '/register' })
+  }
+  if (
+    (to.path === '/register' || to.path === '/sign-up') &&
+    auth.isAuthenticated
+  ) {
+    return next({ path: '/' })
+  }
+  next()
+})
 
 export default router
