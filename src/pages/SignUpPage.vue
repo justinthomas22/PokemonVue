@@ -65,7 +65,12 @@ const handleSignUp = async () => {
   } catch (e: unknown) {
     const err = e as unknown
     error.value =
-      err && err.message ? err.message : "Erreur lors de l'inscription"
+      err &&
+      typeof err === 'object' &&
+      'message' in err &&
+      typeof (err as unknown).message === 'string'
+        ? (err as unknown).message
+        : "Erreur lors de l'inscription"
   } finally {
     loading.value = false
   }

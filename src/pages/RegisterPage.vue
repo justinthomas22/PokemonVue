@@ -50,7 +50,13 @@ const handleLogin = async () => {
     router.push('/')
   } catch (e: unknown) {
     const err = e as unknown
-    error.value = err && err.message ? err.message : 'Identifiants incorrects'
+    error.value =
+      err &&
+      typeof err === 'object' &&
+      'message' in err &&
+      typeof (err as unknown).message === 'string'
+        ? (err as unknown).message
+        : 'Identifiants incorrects'
   } finally {
     loading.value = false
   }
