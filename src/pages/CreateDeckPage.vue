@@ -25,7 +25,10 @@
       >
         Créer
       </NButton>
-      <NAlert v-if="error" type="error">{{ error }}</NAlert>
+
+      <NAlert v-if="error" type="error">
+        {{ error }}
+      </NAlert>
     </NForm>
   </div>
 </template>
@@ -49,6 +52,7 @@ const router = useRouter()
 
 onMounted(async () => {
   const allCards = await api.getCards()
+
   cards.value = allCards.map((c: unknown) => ({
     ...c,
     id: Number(c.id),
@@ -59,14 +63,14 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
   try {
-    await api.createDeck({ name: name.value, cards: selectedIds.value })
+    await api.createDeck({
+      name: name.value,
+      cards: selectedIds.value,
+    })
+
     router.push('/')
   } catch (e: unknown) {
-    const err = e as unknown
-    error.value =
-      typeof err === 'object' && err !== null && 'message' in err
-        ? err.message
-        : 'Erreur lors de la création'
+    error.value = e instanceof Error ? e.message : 'Erreur lors de la création'
   } finally {
     loading.value = false
   }
