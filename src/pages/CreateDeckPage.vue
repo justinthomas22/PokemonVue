@@ -53,7 +53,7 @@ const router = useRouter()
 onMounted(async () => {
   const allCards = await api.getCards()
 
-  cards.value = allCards.map((c: unknown) => ({
+  cards.value = (allCards as Card[]).map((c) => ({
     ...c,
     id: Number(c.id),
   }))

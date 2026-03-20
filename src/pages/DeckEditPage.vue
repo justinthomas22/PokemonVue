@@ -54,13 +54,15 @@ async function loadData() {
   const deckRes = api.getDeck(route.params.id as string)
   const [allCards, deck] = await Promise.all([allCardsRes, deckRes])
 
-  cards.value = allCards.map((c: unknown) => ({
+  cards.value = (allCards as Card[]).map((c) => ({
     ...c,
     id: Number(c.id),
   }))
 
   name.value = deck.name
-  selectedIds.value = deck.cards.map((c: unknown) => Number(c.cardId))
+  selectedIds.value = (deck.cards as { cardId: number }[]).map((c) =>
+    Number(c.cardId),
+  )
 }
 
 onMounted(() => {
