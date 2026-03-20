@@ -16,7 +16,7 @@
 import { computed } from 'vue'
 
 import type { Card as CardType } from '../types/card'
-import Card from './Card.vue'
+import Card from './PokemonCard.vue'
 
 const props = defineProps<{
   cards: CardType[]
