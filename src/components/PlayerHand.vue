@@ -16,15 +16,20 @@
 </template>
 
 <script setup lang="ts">
+import type { Card } from '../types/card'
 import PokemonCard from './PokemonCard.vue'
+
 const props = defineProps<{
-  hand: unknown[]
+  hand: Card[]
   deckCount: number
   isPlayerTurn: boolean
   playerHasActive: boolean
 }>()
-const emit = defineEmits(['play-card'])
-function playCard(card: unknown) {
+const emit = defineEmits<{
+  'play-card': [cardId: number]
+}>()
+
+function playCard(card: Card) {
   if (props.isPlayerTurn && !props.playerHasActive) emit('play-card', card.id)
 }
 </script>

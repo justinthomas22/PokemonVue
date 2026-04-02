@@ -19,7 +19,7 @@ interface GameState {
   result?: 'win' | 'lose' | 'draw'
 }
 
-interface PlayerBoard {
+export interface PlayerBoard {
   hand: Card[]
   deck: Card[]
   active: Card | null
@@ -69,7 +69,9 @@ export const useGameStore = defineStore('game', () => {
       realtimeMessage.value = 'Etat de partie mis a jour.'
     })
     socket.value.on('gameEnded', (result: string) => {
-      if (gameState.value) gameState.value.result = result as unknown
+      if (gameState.value) {
+        gameState.value.result = result as 'win' | 'lose' | 'draw'
+      }
       realtimeMessage.value = 'Partie terminee.'
     })
     socket.value.on('opponentDisconnected', () => {

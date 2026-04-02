@@ -16,7 +16,8 @@ export const useDeckStore = defineStore('deck', () => {
     try {
       decks.value = await api.getMyDecks()
     } catch (e: unknown) {
-      error.value = e.message || 'Erreur lors du chargement des decks'
+      error.value =
+        e instanceof Error ? e.message : 'Erreur lors du chargement des decks'
     } finally {
       loading.value = false
     }

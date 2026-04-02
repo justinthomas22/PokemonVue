@@ -20,8 +20,10 @@
 </template>
 
 <script setup lang="ts">
+import type { PlayerBoard } from '../stores/game'
 import PokemonCard from './PokemonCard.vue'
-defineProps<{ board: unknown; isOpponent: boolean }>()
+
+defineProps<{ board: PlayerBoard | null; isOpponent: boolean }>()
 </script>
 
 <style scoped>
