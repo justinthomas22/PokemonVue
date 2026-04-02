@@ -22,8 +22,8 @@ services:
   api:
     image: seyrinian/tcg-api@sha256:0c254479aa411ea6901651cdf7ad1afaac7fae6ebb0fb0445b515914fa9da3d7
     container_name: tcg_api
-    restart: "no"
-    entrypoint: ["/bin/sh", "-c"]
+    restart: 'no'
+    entrypoint: ['/bin/sh', '-c']
     command:
       - >
         set -e;
