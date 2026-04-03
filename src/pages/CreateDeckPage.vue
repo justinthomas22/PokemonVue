@@ -10,8 +10,16 @@
           <NText>Cartes sélectionnées : {{ selectedIds.length }} / 10</NText>
         </div>
 
+        <NFormItem label="Rechercher une carte">
+          <NInput
+            v-model:value="searchQuery"
+            clearable
+            placeholder="Nom de la carte"
+          />
+        </NFormItem>
+
         <CardGrid
-          :cards="cards"
+          :cards="filteredCards"
           :selected-ids="selectedIds"
           :max-select="10"
           @update:selected-ids="selectedIds = $event"
@@ -35,7 +43,7 @@
 
 <script setup lang="ts">
 import { NText } from 'naive-ui'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import CardGrid from '../components/CardGrid.vue'
@@ -45,10 +53,19 @@ import type { Card } from '../types/card'
 const name = ref('')
 const cards = ref<Card[]>([])
 const selectedIds = ref<number[]>([])
+const searchQuery = ref('')
 const loading = ref(false)
 const error = ref('')
 const api = useApi()
 const router = useRouter()
+
+const filteredCards = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+
+  if (!query) return cards.value
+
+  return cards.value.filter((card) => card.name.toLowerCase().includes(query))
+})
 
 onMounted(async () => {
   const allCards = await api.getCards()
