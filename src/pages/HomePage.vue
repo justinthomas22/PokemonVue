@@ -1,5 +1,72 @@
 <template>
-  <div class="container">
-    <NEmpty description="Page d'accueil à implémenter (tickets 2 et 3)" />
+  <div class="home-layout">
+    <div class="lobby-row">
+      <div class="lobby-col">
+        <Lobby mode="create" />
+      </div>
+      <div class="lobby-col">
+        <Lobby mode="join" />
+      </div>
+    </div>
+    <div class="decklist-row">
+      <DeckList />
+    </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
+
+import DeckList from '../components/DeckList.vue'
+import Lobby from '../components/Lobby.vue'
+import { useGameStore } from '../stores/game'
+
+const router = useRouter()
+const gameStore = useGameStore()
+const { gameState } = storeToRefs(gameStore)
+
+watch(gameState, (newState) => {
+  if (newState) {
+    router.push('/game')
+  }
+})
+</script>
+
+<style scoped>
+.home-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+  gap: 32px;
+}
+.lobby-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  gap: 32px;
+}
+.lobby-col {
+  flex: 1 1 0;
+  min-width: 320px;
+}
+.decklist-row {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .lobby-row {
+    flex-direction: column;
+  }
+
+  .lobby-col {
+    min-width: 0;
+  }
+}
+</style>

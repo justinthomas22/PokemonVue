@@ -16,7 +16,19 @@ import HeaderBar from './components/layout/HeaderBar.vue'
 </script>
 
 <style>
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
 body {
   padding: 0 20px;
+  overflow-y: auto;
+}
+
+.n-layout,
+.n-layout-content {
+  overflow: visible;
 }
 </style>
