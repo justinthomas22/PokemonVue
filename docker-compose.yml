@@ -20,9 +20,19 @@ services:
       retries: 5
 
   api:
-    image: seyrinian/tcg-api:latest
+    image: seyrinian/tcg-api@sha256:0c254479aa411ea6901651cdf7ad1afaac7fae6ebb0fb0445b515914fa9da3d7
     container_name: tcg_api
-    restart: unless-stopped
+    restart: 'no'
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - >
+        set -e;
+        echo "DATABASE_URL=$$DATABASE_URL" > /app/.env;
+        echo "Running database migrations...";
+        npx prisma migrate deploy;
+        echo "Skipping seed step due to upstream image bug";
+        echo "Starting API server...";
+        exec node dist/index.js
     ports:
       - '3001:3001'
     environment:

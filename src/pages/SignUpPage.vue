@@ -82,9 +82,11 @@ const handleSignUp = async () => {
 
 <style scoped>
 .auth-container {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 400px;
-  margin: 60px auto;
-  padding: 32px 24px;
+  margin: 20px auto;
+  padding: 16px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -106,5 +108,12 @@ p {
   margin-top: 12px;
   font-size: 1rem;
   font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .auth-container {
+    margin: 60px auto;
+    padding: 32px 24px;
+  }
 }
 </style>
