@@ -143,4 +143,16 @@ select:focus {
 .lobby-btn {
   margin-top: 8px;
 }
+
+@media (max-width: 767px) {
+  .lobby {
+    padding: 16px;
+    margin: 0 auto 16px auto;
+  }
+
+  .rooms-list {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+}
 </style>

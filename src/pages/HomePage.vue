@@ -42,6 +42,7 @@ watch(gameState, (newState) => {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 24px;
   gap: 32px;
 }
 .lobby-row {
@@ -57,5 +58,15 @@ watch(gameState, (newState) => {
 }
 .decklist-row {
   width: 100%;
+}
+
+@media (max-width: 767px) {
+  .lobby-row {
+    flex-direction: column;
+  }
+
+  .lobby-col {
+    min-width: 0;
+  }
 }
 </style>

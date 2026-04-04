@@ -52,10 +52,11 @@ function playCard(card: Card) {
 }
 .hand-cards {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 6px;
-  overflow-x: auto;
-  padding-bottom: 2px;
+  overflow-x: visible;
+  padding-bottom: 0;
 }
 .deck-count {
   color: #666;
@@ -64,5 +65,13 @@ function playCard(card: Card) {
 .playable {
   cursor: pointer;
   border: 2px solid #67c58f;
+}
+
+@media (min-width: 768px) {
+  .hand-cards {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
 }
 </style>

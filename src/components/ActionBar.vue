@@ -48,13 +48,14 @@ defineEmits<{
 
 <style scoped>
 .action-bar {
+  box-sizing: border-box;
   width: 100%;
   background: #fff;
   border: 1px solid #ececec;
   border-radius: 10px;
   padding: 8px 10px;
   display: grid;
-  grid-template-columns: 140px 1fr auto;
+  grid-template-columns: 1fr;
   align-items: center;
   gap: 10px;
 }
@@ -74,17 +75,19 @@ defineEmits<{
   border-color: #c8e7d4;
 }
 .action-messages {
-  text-align: center;
+  text-align: left;
   color: #7b7b7b;
   font-style: italic;
   font-size: 0.85rem;
 }
 .actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: stretch;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .actions button {
+  flex: 1 1 120px;
   padding: 6px 11px;
   border-radius: 4px;
   border: 1px solid #d8d8d8;
@@ -113,7 +116,27 @@ defineEmits<{
 .action-error {
   color: #d32f2f;
   grid-column: 1 / -1;
-  text-align: center;
+  text-align: left;
   font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .action-bar {
+    grid-template-columns: 140px 1fr auto;
+  }
+
+  .action-messages,
+  .action-error {
+    text-align: center;
+  }
+
+  .actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .actions button {
+    flex: 0 1 auto;
+  }
 }
 </style>

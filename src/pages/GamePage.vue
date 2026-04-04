@@ -69,15 +69,24 @@ function handleGameClose() {
 
 <style scoped>
 .game-page {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
-  width: min(1220px, 96vw);
-  margin: 12px auto;
-  padding: 8px 10px 14px;
+  width: min(1220px, 100%);
+  margin: 8px auto;
+  padding: 8px;
   background: #fff;
   border: 1px solid #e7e7e7;
   border-radius: 14px;
+}
+
+@media (min-width: 768px) {
+  .game-page {
+    width: min(1220px, 96vw);
+    margin: 12px auto;
+    padding: 8px 10px 14px;
+  }
 }
 </style>

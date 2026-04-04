@@ -110,12 +110,14 @@ async function handleSubmit() {
 
 <style scoped>
 .edit-deck {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 700px;
-  margin: 32px auto;
+  margin: 16px auto;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 24px;
+  padding: 16px;
 }
 .deck-cards-section {
   margin: 24px 0;
@@ -127,5 +129,12 @@ async function handleSubmit() {
 .edit-btn {
   width: 100%;
   margin-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .edit-deck {
+    margin: 32px auto;
+    padding: 24px;
+  }
 }
 </style>

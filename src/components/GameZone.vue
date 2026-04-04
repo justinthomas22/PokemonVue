@@ -28,13 +28,14 @@ defineProps<{ board: PlayerBoard | null; isOpponent: boolean }>()
 
 <style scoped>
 .game-zone {
+  box-sizing: border-box;
   width: 100%;
-  min-height: 280px;
+  min-height: 220px;
   background: #f6f6f6;
   border: 1px solid #ebebeb;
   border-radius: 14px;
   margin: 0;
-  padding: 14px 18px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -72,5 +73,12 @@ defineProps<{ board: PlayerBoard | null; isOpponent: boolean }>()
 }
 .hand-slot {
   margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .game-zone {
+    min-height: 280px;
+    padding: 14px 18px;
+  }
 }
 </style>

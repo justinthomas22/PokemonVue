@@ -1,18 +1,19 @@
 <template>
-  <div class="card-grid">
-    <Card
-      v-for="card in cards"
-      :key="card.id"
-      :card="card"
-      :size="size"
-      :selected="selectedIds?.includes(Number(card.id)) ?? false"
-      :disabled="isDisabled(Number(card.id))"
-      @click="toggleSelect(card)"
-    />
-  </div>
+  <NGrid responsive="screen" cols="2 m:3 l:4" :x-gap="12" :y-gap="12">
+    <NGridItem v-for="card in cards" :key="card.id" class="card-grid-item">
+      <Card
+        :card="card"
+        :size="size"
+        :selected="selectedIds?.includes(Number(card.id)) ?? false"
+        :disabled="isDisabled(Number(card.id))"
+        @click="toggleSelect(card)"
+      />
+    </NGridItem>
+  </NGrid>
 </template>
 
 <script setup lang="ts">
+import { NGrid, NGridItem } from 'naive-ui'
 import { computed } from 'vue'
 
 import type { Card as CardType } from '../types/card'
@@ -54,10 +55,19 @@ function toggleSelect(card: CardType) {
 </script>
 
 <style scoped>
-.card-grid {
+.card-grid-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
   justify-content: center;
+}
+
+:deep(.card) {
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  :deep(.card.md) {
+    width: 150px;
+    height: 220px;
+  }
 }
 </style>
