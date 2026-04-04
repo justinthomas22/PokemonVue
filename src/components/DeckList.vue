@@ -72,7 +72,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useApi } from '../composables/useApi'
-import type { Card } from '../types/card'
+import type { Card, DeckCard } from '../types/card'
 import type { Deck } from '../types/deck'
 
 const decks = ref<Deck[]>([])
@@ -81,19 +81,25 @@ const loading = ref(true)
 const api = useApi()
 const router = useRouter()
 
+type DeckCardWithDetails = DeckCard & {
+  card: Card
+}
+
 const gridCols = computed(() => {
   if (decks.value.length <= 1) return '1'
   if (decks.value.length === 2) return '1 m:2'
   return '1 m:2 l:3'
 })
 
-function getDeckCards(deck: Deck) {
-  return deck.cards
-    .map((deckCard) => ({
-      ...deckCard,
-      card: allCards.value.find((c) => c.id === deckCard.cardId),
-    }))
-    .filter((dc) => dc.card !== undefined)
+function getDeckCards(deck: Deck): DeckCardWithDetails[] {
+  const mappedCards = deck.cards.map((deckCard) => ({
+    ...deckCard,
+    card: allCards.value.find((c) => c.id === deckCard.cardId),
+  }))
+
+  return mappedCards.filter(
+    (deckCard): deckCard is DeckCardWithDetails => deckCard.card !== undefined,
+  )
 }
 
 async function fetchDecks() {
