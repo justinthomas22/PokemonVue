@@ -4,6 +4,7 @@ import { io } from 'socket.io-client'
 import { computed, ref } from 'vue'
 
 import { useStorage } from '../composables/useStorage'
+import type { User } from '../types/auth'
 import type { Card } from '../types/card'
 
 interface Room {
@@ -26,9 +27,40 @@ export interface PlayerBoard {
   score: number
 }
 
+function transformBackendGameState(payload: unknown): GameState | null {
+  const state = payload.gameState || payload
+  if (!state) return null
+
+  const host = state.host
+  const guest = state.guest
+  if (!host || !guest) return null
+
+  return {
+    currentTurn: state.currentPlayerSocketId || '',
+    host: host.socketId || '',
+    guest: guest.socketId || '',
+    boards: {
+      [host.socketId || '']: {
+        hand: host.board?.hand || [],
+        deck: host.board?.deck || [],
+        active: host.board?.activeCard || null,
+        score: host.board?.score || 0,
+      },
+      [guest.socketId || '']: {
+        hand: guest.board?.hand || [],
+        deck: guest.board?.deck || [],
+        active: guest.board?.activeCard || null,
+        score: guest.board?.score || 0,
+      },
+    },
+    result: state.result,
+  }
+}
+
 export const useGameStore = defineStore('game', () => {
   const storage = useStorage()
   const token = storage.get<string>('token')
+  const user = storage.get<User>('user')
   const socket = ref<Socket | null>(null)
 
   // Lobby state
@@ -57,15 +89,25 @@ export const useGameStore = defineStore('game', () => {
       socket.value?.emit('getRooms')
     })
     socket.value.on('roomCreated', (roomId: string) => {
-      currentRoomId.value = roomId
+      currentRoomId.value = String(roomId)
       realtimeMessage.value = `Room creee: ${roomId}`
     })
-    socket.value.on('gameStarted', (state: GameState) => {
-      gameState.value = state
+    socket.value.on('roomJoined', (roomId: string) => {
+      currentRoomId.value = String(roomId)
+      realtimeMessage.value = `Room rejointe: ${roomId}`
+    })
+    socket.value.on('gameStarted', (payload: unknown) => {
+      const roomId = payload?.gameState?.roomId
+      if (roomId) currentRoomId.value = String(roomId)
+      const state = transformBackendGameState(payload)
+      if (state) gameState.value = state
       realtimeMessage.value = 'Partie demarree.'
     })
-    socket.value.on('gameStateUpdated', (state: GameState) => {
-      gameState.value = state
+    socket.value.on('gameStateUpdated', (payload: unknown) => {
+      const roomId = payload?.gameState?.roomId
+      if (roomId) currentRoomId.value = String(roomId)
+      const state = transformBackendGameState(payload)
+      if (state) gameState.value = state
       realtimeMessage.value = 'Etat de partie mis a jour.'
     })
     socket.value.on('gameEnded', (result: string) => {
@@ -75,10 +117,12 @@ export const useGameStore = defineStore('game', () => {
       realtimeMessage.value = 'Partie terminee.'
     })
     socket.value.on('opponentDisconnected', () => {
-      gameError.value = 'L’adversaire a quitté la partie.'
+      gameError.value = "L'adversaire a quitté la partie."
       realtimeMessage.value = 'Adversaire deconnecte.'
     })
-    socket.value.on('error', (msg: string) => {
+    socket.value.on('error', (err: unknown) => {
+      const msg =
+        typeof err === 'string' ? err : err?.message || 'Erreur inconnue'
       lobbyError.value = msg
       gameError.value = msg
       realtimeMessage.value = msg
@@ -96,19 +140,19 @@ export const useGameStore = defineStore('game', () => {
 
   // Game actions
   function drawCards() {
-    socket.value?.emit('drawCards')
+    socket.value?.emit('drawCards', { roomId: currentRoomId.value })
     realtimeMessage.value = 'Demande: piocher.'
   }
   function playCard(cardId: number) {
-    socket.value?.emit('playCard', { cardId })
+    socket.value?.emit('playCard', { roomId: currentRoomId.value, cardId })
     realtimeMessage.value = 'Demande: jouer une carte.'
   }
   function attack() {
-    socket.value?.emit('attack')
+    socket.value?.emit('attack', { roomId: currentRoomId.value })
     realtimeMessage.value = 'Demande: attaquer.'
   }
   function endTurn() {
-    socket.value?.emit('endTurn')
+    socket.value?.emit('endTurn', { roomId: currentRoomId.value })
     realtimeMessage.value = 'Demande: fin de tour.'
   }
   function resetGame() {
@@ -121,29 +165,41 @@ export const useGameStore = defineStore('game', () => {
   // Getters
   const isPlayerTurn = computed(() => {
     if (!gameState.value) return false
-    return gameState.value.currentTurn === socket.value?.id
+    const socketMatch = gameState.value.currentTurn === socket.value?.id
+    const userMatch =
+      user?.id && gameState.value.currentTurn === String(user.id)
+    return !!(socketMatch || userMatch)
   })
   const playerRole = computed(() => {
     if (!gameState.value) return null
-    if (gameState.value.host === socket.value?.id) return 'host'
-    if (gameState.value.guest === socket.value?.id) return 'guest'
+    const socketId = socket.value?.id
+    const userId = user?.id ? String(user.id) : null
+    if (gameState.value.host === socketId || gameState.value.host === userId)
+      return 'host'
+    if (gameState.value.guest === socketId || gameState.value.guest === userId)
+      return 'guest'
     return null
   })
   const playerBoard = computed(() => {
-    if (!gameState.value || !socket.value || !socket.value.id) return null
-    if (!gameState.value.boards) return null
-    return gameState.value.boards[socket.value.id]
+    if (!gameState.value || !gameState.value.boards) return null
+    const socketId = socket.value?.id
+    const userId = user?.id ? String(user.id) : null
+    return (
+      gameState.value.boards[socketId || ''] ||
+      gameState.value.boards[userId || ''] ||
+      null
+    )
   })
   const opponentBoard = computed(() => {
-    if (!gameState.value || !socket.value || !socket.value.id) return null
-    if (!gameState.value.boards) return null
-    const socketId = socket.value.id
+    if (!gameState.value || !gameState.value.boards) return null
+    const socketId = socket.value?.id
+    const userId = user?.id ? String(user.id) : null
+    const myKey = socketId || userId
     const ids = Object.keys(gameState.value.boards)
-    const opponentId = ids.find((id) => id !== socketId)
+    const opponentId = ids.find((id) => id !== myKey)
     return opponentId ? gameState.value.boards[opponentId] : null
   })
 
-  // New computeds for disable logic (Step 1)
   const handFull = computed(
     () => !!playerBoard.value?.hand && playerBoard.value.hand.length >= 5,
   )
