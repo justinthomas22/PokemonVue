@@ -27,33 +27,38 @@ export interface PlayerBoard {
   score: number
 }
 
-function transformBackendGameState(payload: unknown): GameState | null {
-  const state = payload.gameState || payload
+function transformBackendGameState(
+  payload: Record<string, unknown>,
+): GameState | null {
+  const state = (payload.gameState ?? payload) as Record<string, unknown>
   if (!state) return null
 
-  const host = state.host
-  const guest = state.guest
+  const host = state.host as Record<string, unknown> | undefined
+  const guest = state.guest as Record<string, unknown> | undefined
   if (!host || !guest) return null
 
+  const hostBoard = host.board as Record<string, unknown> | undefined
+  const guestBoard = guest.board as Record<string, unknown> | undefined
+
   return {
-    currentTurn: state.currentPlayerSocketId || '',
-    host: host.socketId || '',
-    guest: guest.socketId || '',
+    currentTurn: (state.currentPlayerSocketId as string) || '',
+    host: (host.socketId as string) || '',
+    guest: (guest.socketId as string) || '',
     boards: {
-      [host.socketId || '']: {
-        hand: host.board?.hand || [],
-        deck: host.board?.deck || [],
-        active: host.board?.activeCard || null,
-        score: host.board?.score || 0,
+      [(host.socketId as string) || '']: {
+        hand: (hostBoard?.hand as Card[]) || [],
+        deck: (hostBoard?.deck as Card[]) || [],
+        active: (hostBoard?.activeCard as Card) || null,
+        score: (hostBoard?.score as number) || 0,
       },
-      [guest.socketId || '']: {
-        hand: guest.board?.hand || [],
-        deck: guest.board?.deck || [],
-        active: guest.board?.activeCard || null,
-        score: guest.board?.score || 0,
+      [(guest.socketId as string) || '']: {
+        hand: (guestBoard?.hand as Card[]) || [],
+        deck: (guestBoard?.deck as Card[]) || [],
+        active: (guestBoard?.activeCard as Card) || null,
+        score: (guestBoard?.score as number) || 0,
       },
     },
-    result: state.result,
+    result: state.result as 'win' | 'lose' | 'draw' | undefined,
   }
 }
 
@@ -96,15 +101,21 @@ export const useGameStore = defineStore('game', () => {
       currentRoomId.value = String(roomId)
       realtimeMessage.value = `Room rejointe: ${roomId}`
     })
-    socket.value.on('gameStarted', (payload: unknown) => {
-      const roomId = payload?.gameState?.roomId
+    socket.value.on('gameStarted', (payload: Record<string, unknown>) => {
+      const gameStatePayload = payload?.gameState as
+        | Record<string, unknown>
+        | undefined
+      const roomId = gameStatePayload?.roomId
       if (roomId) currentRoomId.value = String(roomId)
       const state = transformBackendGameState(payload)
       if (state) gameState.value = state
       realtimeMessage.value = 'Partie demarree.'
     })
-    socket.value.on('gameStateUpdated', (payload: unknown) => {
-      const roomId = payload?.gameState?.roomId
+    socket.value.on('gameStateUpdated', (payload: Record<string, unknown>) => {
+      const gameStatePayload = payload?.gameState as
+        | Record<string, unknown>
+        | undefined
+      const roomId = gameStatePayload?.roomId
       if (roomId) currentRoomId.value = String(roomId)
       const state = transformBackendGameState(payload)
       if (state) gameState.value = state
@@ -120,9 +131,11 @@ export const useGameStore = defineStore('game', () => {
       gameError.value = "L'adversaire a quitté la partie."
       realtimeMessage.value = 'Adversaire deconnecte.'
     })
-    socket.value.on('error', (err: unknown) => {
+    socket.value.on('error', (err: Record<string, unknown> | string) => {
       const msg =
-        typeof err === 'string' ? err : err?.message || 'Erreur inconnue'
+        typeof err === 'string'
+          ? err
+          : (err?.message as string) || 'Erreur inconnue'
       lobbyError.value = msg
       gameError.value = msg
       realtimeMessage.value = msg
